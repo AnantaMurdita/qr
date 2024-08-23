@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Generator with Download</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+            overflow: hidden;
+        }
+
+        .preloader {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #ffffff;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            left: 0;
+            z-index: 100;
+        }
+
+        .container {
+            --uib-size: 50px;
+            --uib-color: #3498db;
+            --uib-speed: 1.5s;
+            --uib-dot-size: calc(var(--uib-size) * 0.4);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: var(--uib-dot-size);
+            width: var(--uib-size);
+        }
+
+        .container::before,
+        .container::after {
+            content: '';
+            position: absolute;
+            height: var(--uib-dot-size);
+            width: var(--uib-dot-size);
+            border-radius: 50%;
+            background-color: var(--uib-color);
+            flex-shrink: 0;
+            transition: background-color 0.3s ease;
+        }
+
+        .container::before {
+            animation: orbit var(--uib-speed) linear infinite;
+        }
+
+        .container::after {
+            animation: orbit var(--uib-speed) linear calc(var(--uib-speed) / -2) infinite;
+        }
+
+        @keyframes orbit {
+            0%, 100% {
+                transform: translateX(calc(var(--uib-size) * 0.25)) scale(0.73684);
+                opacity: 0.65;
+            }
+            50% {
+                transform: translateX(calc(var(--uib-size) * -0.25)) scale(1);
+                opacity: 1;
+            }
+        }
+
+        #animated-text-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #ffffff;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            left: 0;
+            z-index: 200;
+            font-size: 48px;
+            font-weight: bold;
+            color: #3498db;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        #main-content {
+            display: none;
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            width: 60%;
+            max-width: 300px;
+            border: 2px solid #3498db;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #3498db;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        #qr-code {
+            margin-top: 20px;
+            border: 2px solid #3498db;
+            border-radius: 10px;
+        }
+
+        #download {
+            display: none;
+            margin-top: 10px;
+        }
+
+        @media screen and (min-width: 768px) {
+            #qr-code {
+                margin-top: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Preloader -->
+    <div class="preloader">
+        <div class="container"></div>
+    </div>
+
+    <!-- Animated Text -->
+    <div id="animated-text-container"></div>
+
+    <!-- Main Content -->
+    <div id="main-content">
+        <h1>QR Code Generator</h1>
+        <input type="text" id="text" placeholder="Enter text or URL">
+        <button onclick="generateQRCode()">Generate QR Code</button>
+        <canvas id="qr-code"></canvas>
+        <button id="download" onclick="downloadQRCode()">Download QR Code</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
+    <script>
+        function generateQRCode() {
+            const text = document.getElementById('text').value;
+            const canvas = document.getElementById('qr-code');
+            QRCode.toCanvas(canvas, text, { width: 200 }).then(() => {
+                document.getElementById('download').style.display = 'inline-block';
+            }).catch(err => console.error(err));
+        }
+
+        function downloadQRCode() {
+            const canvas = document.getElementById('qr-code');
+            const link = document.createElement('a');
+            link.href = canvas.toDataURL('image/png');
+            link.download = 'qrcode.png';
+            link.click();
+        }
+
+        // Simulate loading time
+        window.onload = function() {
+            setTimeout(function() {
+                document.querySelector('.preloader').style.display = 'none';
+                document.getElementById('animated-text-container').style.opacity = 1;
+                animateText("The Developer is Ananta");
+            }, 3000); // Ganti 3000 ms dengan waktu loading yang diinginkan
+        }
+
+        function animateText(text) {
+            const container = document.getElementById('animated-text-container');
+            text.split('').forEach((char, index) => {
+                setTimeout(() => {
+                    container.textContent += char;
+                }, index * 300); // Adjust the timing as needed
+            });
+
+            // After text animation, show the main content
+            setTimeout(() => {
+                container.style.opacity = 0;
+                setTimeout(() => {
+                    container.style.display = 'none';
+                    document.getElementById('main-content').style.display = 'block';
+                    document.body.style.overflow = 'auto';
+                }, 500); // Transition time for fade out
+            }, text.length * 300 + 500); // Total time for the text animation
+        }
+    </script>
+</body>
+</html>
